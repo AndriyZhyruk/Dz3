@@ -1,0 +1,77 @@
+using System;
+
+class SimpleCalculator
+{
+    public delegate void OperationCompletedHandler(double num1, double num2, string operation, double? result);
+    public event OperationCompletedHandler OnOperationCompleted;
+
+    public void Calculate(double num1, double num2, string operation)
+    {
+        double? result = null;
+
+        switch (operation)
+        {
+            case "+":
+                result = num1 + num2;
+                break;
+            case "-":
+                result = num1 - num2;
+                break;
+            case "*":
+                result = num1 * num2;
+                break;
+            case "/":
+                if (num2 != 0)
+                {
+                    result = num1 / num2;
+                }
+                else
+                {
+                    Console.WriteLine("Error: Division by zero.");
+                }
+                break;
+            default:
+                Console.WriteLine("Error: Unknown operation.");
+                return;
+        }
+
+        OnOperationCompleted?.Invoke(num1, num2, operation, result);
+    }
+}
+
+class OperationLogger
+{
+    public void LogOperation(double num1, double num2, string operation, double? result)
+    {
+        if (result.HasValue)
+        {
+            Console.WriteLine($"Operation: {num1} {operation} {num2} = {result}");
+        }
+        else
+        {
+            Console.WriteLine($"Operation: {num1} {operation} {num2} - Error in calculation.");
+        }
+    }
+}
+
+class Program
+{
+    public static void Main()
+    {
+        SimpleCalculator calculator = new SimpleCalculator();
+        OperationLogger logger = new OperationLogger();
+
+        calculator.OnOperationCompleted += logger.LogOperation;
+
+        Console.Write("Enter the first number: ");
+        double num1 = Convert.ToDouble(Console.ReadLine());
+
+        Console.Write("Enter the second number: ");
+        double num2 = Convert.ToDouble(Console.ReadLine());
+
+        Console.Write("Enter the operation (+, -, *, /): ");
+        string operation = Console.ReadLine();
+
+        calculator.Calculate(num1, num2, operation);
+    }
+}
